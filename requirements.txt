@@ -1,0 +1,13 @@
+git+https://github.com/huggingface/transformers.git
+git+https://github.com/roboflow/supervision.git
+accelerate
+torchmetrics
+albumentations>=1.4.5
+torch==2.0.1
+torchvision==0.15.2
+onnx==1.14.0
+onnxruntime==1.15.1
+pycocotools
+PyYAML
+scipy
+roboflow
