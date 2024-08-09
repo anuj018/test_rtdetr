@@ -111,4 +111,19 @@ conf_mat.savefig("figure.png")
 # print(type(conf_mat))
 # cv2.imwrite('confmat.png', conf_mat)
 
+# Export the model to ONNX
+dummy_input = torch.randn(1, 3, 224, 224).to(DEVICE)
+
+torch.onnx.export(
+    model,                      # Model to export
+    dummy_input,                # Example input data
+    "rtdetr_r50vd.onnx",        # Output ONNX file path
+    input_names=["input"],      # Input name
+    output_names=["output"],    # Output name
+    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}, # Dynamic batch size
+    opset_version=16          # ONNX opset version
+)
+
+print("Model successfully exported to ONNX format!")
+
 

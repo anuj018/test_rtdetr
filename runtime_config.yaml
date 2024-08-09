@@ -1,0 +1,36 @@
+model:
+  checkpoint: "./rtdetr_r50vd"
+  anchor_image_size: null
+  ignore_mismatched_sizes: true
+  id2label: {}
+  label2id: {}
+
+training_args:
+  output_dir: './fine_tuned_models'
+  num_train_epochs: 50
+  max_grad_norm: 0.1
+  learning_rate: 5e-5
+  warmup_steps: 300
+  per_device_train_batch_size: 4
+  dataloader_num_workers: 2
+  metric_for_best_model: "eval_map"
+  greater_is_better: true
+  load_best_model_at_end: true
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 2
+  remove_unused_columns: false
+  eval_do_concat_batches: false
+
+dataset:
+  path: './dataset'
+  format: 'yolo'
+
+image_processing:
+  do_resize: true
+  size:
+    width: 640
+    height: 640
+
+output:
+  saved_model_path: "./saved_model_path"
