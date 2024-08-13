@@ -6,9 +6,12 @@ import cv2
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+import time 
 
 
 def load_detection_datasets(dataset_path: str, format: str = 'yolo'):
+    print(dataset_path)
     if format == 'yolo':
         ds_train = sv.DetectionDataset.from_yolo(
             images_directory_path=Path(f"{dataset_path}/train/images"),
@@ -16,8 +19,8 @@ def load_detection_datasets(dataset_path: str, format: str = 'yolo'):
             data_yaml_path=Path(f"{dataset_path}/data.yaml")
         )
         ds_valid = sv.DetectionDataset.from_yolo(
-            images_directory_path=Path(f"{dataset_path}/valid/images"),
-            annotations_directory_path=Path(f"{dataset_path}/valid/labels"),
+            images_directory_path=Path(f"{dataset_path}/val/images"),
+            annotations_directory_path=Path(f"{dataset_path}/val/labels"),
             data_yaml_path=Path(f"{dataset_path}/data.yaml")
         )
         ds_test = sv.DetectionDataset.from_yolo(
@@ -145,9 +148,15 @@ class PyTorchDetectionDataset(Dataset):
 
     def __getitem__(self, idx):
         _, image, annotations = self.dataset[idx]
+        # Convert BGR to RGB if necessary
+        if image.shape[-1] == 3:  # Ensure the image has 3 channels
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # print(f'orig image shape is {image}')
+        # orig_image_PIL = Image.fromarray(image)
+        # orig_image_PIL.save(f"orig_image_PIL_{idx}.png")
         boxes = annotations.xyxy
+        # print(f'boxes before is {boxes}')
         categories = annotations.class_id
-
         if self.transform:
             transformed = self.transform(
                 image=image,
@@ -156,16 +165,39 @@ class PyTorchDetectionDataset(Dataset):
             )
             transformed_image = transformed["image"]
             transformed_boxes = transformed["bboxes"]
+            # print(f'transformed_boxes are {transformed_boxes}')
             #print(f'transformed boxes are {transformed_boxes}')
             transformed_categories = transformed["category"]
         formatted_annotations = self.annotations_as_coco(
             image_id=idx, categories=transformed_categories, boxes=transformed_boxes)
+        # print(f'formatted_annotations is {formatted_annotations}')
         # ann = formatted_annotations
         #print(f'formatted annotations are {ann}')
         result = self.processor(
             images=transformed_image, annotations=formatted_annotations, return_tensors="pt")
 
         # Image processor expands batch dimension, let's squeeze it
+        
         result = {k: v[0] for k, v in result.items()}
+        # print(f'result is {result}')
+        
+        # # Get the image tensor
+        # pixel_values = result['pixel_values']
 
+        # # Convert the tensor to a numpy array
+        # pixel_values = pixel_values.squeeze().detach().cpu().numpy()
+
+        # # Normalize if necessary (e.g., if in range [-1, 1])
+        # pixel_values = (pixel_values - pixel_values.min()) / (pixel_values.max() - pixel_values.min()) * 255
+
+        # # Convert to uint8
+        # pixel_values = pixel_values.astype(np.uint8)
+
+        # # Convert numpy array to PIL Image
+        # print(f'shape is {pixel_values.shape}')
+        # processed_image_pil = Image.fromarray(pixel_values.transpose(1, 2, 0))  # Convert from CxHxW to HxWxC
+
+        # # Save the image
+        # processed_image_pil.save(f"square_processed_image_{idx}.png")
+        # # time.sleep(35.0)
         return result

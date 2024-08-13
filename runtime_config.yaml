@@ -29,8 +29,8 @@ dataset:
 image_processing:
   do_resize: true
   size:
-    width: 640
-    height: 640
+    width: 1280
+    height: 1280
 
 output:
   saved_model_path: "./saved_model_path"

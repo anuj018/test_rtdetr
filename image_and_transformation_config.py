@@ -3,7 +3,7 @@ from albumentations.pytorch import ToTensorV2
 
 image_mean = [0.485, 0.456, 0.406 ]
 image_std = [0.229, 0.224, 0.225]
-IMAGE_SIZE = (640,640) #WIDTH,HEIGHT
+IMAGE_SIZE = (640,360) #WIDTH,HEIGHT
 
 # Define the augmentation pipeline for training
 train_augmentation_and_transform_yolo = A.Compose(
